@@ -625,7 +625,7 @@ export class AgentIntentInvocation extends EditCodeIntentInvocation implements I
 	private _lastRenderTokenCount: number = 0;
 
 	/** Cached model capabilities from the most recent main agent render, reused by the background summarizer. */
-	private _lastModelCapabilities: { enableThinking: boolean; reasoningEffort: string | undefined; enableToolSearch: boolean; enableContextEditing: boolean } | undefined;
+	private _lastModelCapabilities: { enableThinking: boolean; reasoningEffort: string | undefined; enableToolSearch: boolean; enableContextEditing: boolean; extendedCacheTtl: boolean } | undefined;
 
 	/**
 	 * RNG used to jitter the background-summarization trigger threshold around 0.80.
@@ -1031,6 +1031,7 @@ export class AgentIntentInvocation extends EditCodeIntentInvocation implements I
 					reasoningEffort: typeof rawEffort === 'string' ? rawEffort : undefined,
 					enableToolSearch: !isSubagent && !!this.endpoint.supportsToolSearch,
 					enableContextEditing: !isSubagent && isAnthropicContextEditingEnabled(this.endpoint, this.configurationService, this.expService),
+					extendedCacheTtl: this.request.modelConfiguration?.extendedCacheTtl === true,
 				};
 				this._startBackgroundSummarization(backgroundSummarizer, result.messages, promptContext, props, token, postRenderRatio);
 			}

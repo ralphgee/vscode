@@ -708,6 +708,7 @@ class DefaultToolCallingLoop extends ToolCallingLoop<IDefaultToolLoopOptions> {
 		const isThinkingLocation = location === ChatLocation.Agent || location === ChatLocation.MessagesProxy;
 		const rawEffort = this.options.request.modelConfiguration?.reasoningEffort;
 		const reasoningEffort = typeof rawEffort === 'string' ? rawEffort : undefined;
+		const extendedCacheTtl = this.options.request.modelConfiguration?.extendedCacheTtl === true;
 		const isSubagent = !!this.options.request.subAgentInvocationId;
 		const modeChanged = this.didModeChangeSincePreviousRequest();
 		return this.options.invocation.endpoint.makeChatRequest2({
@@ -719,6 +720,7 @@ class DefaultToolCallingLoop extends ToolCallingLoop<IDefaultToolLoopOptions> {
 				reasoningEffort,
 				enableToolSearch: !isSubagent && !!this.options.invocation.endpoint.supportsToolSearch,
 				enableContextEditing: !isSubagent && isAnthropicContextEditingEnabled(this.options.invocation.endpoint, this._configurationService, this._experimentationService),
+				extendedCacheTtl,
 			},
 			debugName,
 			conversationId: this.options.conversation.sessionId,

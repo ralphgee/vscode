@@ -22,7 +22,7 @@ import { IOpenerService } from '../../../../../../../platform/opener/common/open
 import { getModelContextWindowTotal, ILanguageModelChatMetadata, ILanguageModelChatMetadataAndIdentifier } from '../../../../common/languageModels.js';
 import { formatModelCost, getCreditsPerMillionTokensLabel, getMaxContextLabel, getModelCostMetrics, renderModelDescription } from './modelPickerDetails.js';
 import { createMessageBanner } from './modelPickerHover.js';
-import { getChangedModelConfigProperties, getModelConfigChoices, getModelConfigProperty, IModelConfigProperty, IModelConfigurationAccess, isExtendedContext, MODEL_CONFIG_GROUP_CONTEXT, MODEL_CONFIG_GROUP_EFFORT, ModelConfigChangeListener, setModelConfigValues } from './modelPickerModelConfig.js';
+import { getChangedModelConfigProperties, getModelConfigChoices, getModelConfigProperty, IModelConfigProperty, IModelConfigurationAccess, isExtendedContext, MODEL_CONFIG_GROUP_CACHE, MODEL_CONFIG_GROUP_CONTEXT, MODEL_CONFIG_GROUP_EFFORT, ModelConfigChangeListener, setModelConfigValues } from './modelPickerModelConfig.js';
 import { getCategoryLabel, getPriceCategoryLabel, isAutoModel, isHighCostCategory, isHydraFusionModel, isMultiplierPricing } from './modelPickerPresentation.js';
 import { IModelSpeedVariants } from './modelPickerVariants.js';
 import { getOrganizationDefaultDescription } from './modelPickerBadges.js';
@@ -231,6 +231,7 @@ export class ModelCard extends DisposableStore {
 		const isAuto = isAutoModel(model);
 		const isRoutingModel = isAuto || isHydraFusionModel(model);
 		const effort = this._configProperty(MODEL_CONFIG_GROUP_EFFORT);
+		const cache = this._configProperty(MODEL_CONFIG_GROUP_CACHE);
 		const context = this._configProperty(MODEL_CONFIG_GROUP_CONTEXT);
 
 		this._renderHeader();
@@ -262,6 +263,9 @@ export class ModelCard extends DisposableStore {
 
 		if (effort) {
 			this._renderEffortSection(effort, isAuto);
+		}
+		if (cache) {
+			this._renderChoiceSection(cache, MODEL_CONFIG_GROUP_CACHE, cache.schema.title ?? localize('chat.cache.header', "Prompt Cache"));
 		}
 		if (context) {
 			this._renderContextSection(context);

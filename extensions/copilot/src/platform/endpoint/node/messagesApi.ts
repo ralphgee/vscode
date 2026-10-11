@@ -262,10 +262,12 @@ export function createMessagesRequestBody(accessor: ServicesAccessor, options: I
 	// The rolling message breakpoints default to the 5m TTL and only upgrade to
 	// 1h when the `extendedTtlMessages` sub-toggle is on (which itself requires
 	// the parent `extendedTtl` to be on — see `isExtendedCacheTtlMessagesEnabled`).
+	// The "1h Cache" model picker option turns on both, in addition to the settings.
 	const isSubagent = options.interactionTypeOverride === 'conversation-subagent';
-	const useExtendedCacheTtl = isExtendedCacheTtlEnabled(endpoint, configurationService, experimentationService, options.location, isSubagent);
+	const extendedCacheTtlSelected = options.modelCapabilities?.extendedCacheTtl;
+	const useExtendedCacheTtl = isExtendedCacheTtlEnabled(endpoint, configurationService, experimentationService, options.location, isSubagent, extendedCacheTtlSelected);
 	const cacheTtl = useExtendedCacheTtl ? '1h' : undefined;
-	const useExtendedCacheTtlMessages = isExtendedCacheTtlMessagesEnabled(useExtendedCacheTtl, configurationService, experimentationService);
+	const useExtendedCacheTtlMessages = isExtendedCacheTtlMessagesEnabled(useExtendedCacheTtl, configurationService, experimentationService, extendedCacheTtlSelected);
 	const messageCacheTtl = useExtendedCacheTtlMessages ? '1h' : undefined;
 
 	clearAllCacheControl(messagesResult);

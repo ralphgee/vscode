@@ -194,6 +194,9 @@ export function modelSupportsExtendedCacheTtl(model: LanguageModelChat | IChatEn
  * correctly excluded by this strict check.
  * @param isSubagent Subagent requests are short-lived and would not benefit
  * from the 1h TTL.
+ * @param extendedCacheTtlSelected The "1h Cache" option from the model picker.
+ * When `true`, it turns the extended TTL on in addition to the setting; it never
+ * turns it off. The model, location, and subagent gates still apply.
  */
 export function isExtendedCacheTtlEnabled(
 	endpoint: IChatEndpoint | string,
@@ -201,6 +204,7 @@ export function isExtendedCacheTtlEnabled(
 	experimentationService: IExperimentationService,
 	location: ChatLocation | undefined,
 	isSubagent: boolean | undefined,
+	extendedCacheTtlSelected?: boolean,
 ): boolean {
 	if (!modelSupportsExtendedCacheTtl(endpoint)) {
 		return false;
@@ -210,6 +214,9 @@ export function isExtendedCacheTtlEnabled(
 	}
 	if (isSubagent) {
 		return false;
+	}
+	if (extendedCacheTtlSelected) {
+		return true;
 	}
 	return configurationService.getExperimentBasedConfig(ConfigKey.Advanced.AnthropicExtendedCacheTtl, experimentationService);
 }
@@ -235,14 +242,22 @@ export function isExtendedCacheTtlEnabled(
  * Message breakpoints rotate every turn, so a 1h write that gets superseded
  * within minutes wastes the 2x write premium. Only worthwhile when
  * conversations span large idle gaps (>5m) between turns.
+ *
+ * @param extendedCacheTtlSelected The "1h Cache" option from the model picker.
+ * When `true`, the message breakpoints use the 1h TTL as well, in addition to
+ * the setting. It still requires {@link parentEnabled}.
  */
 export function isExtendedCacheTtlMessagesEnabled(
 	parentEnabled: boolean,
 	configurationService: IConfigurationService,
 	experimentationService: IExperimentationService,
+	extendedCacheTtlSelected?: boolean,
 ): boolean {
 	if (!parentEnabled) {
 		return false;
+	}
+	if (extendedCacheTtlSelected) {
+		return true;
 	}
 	return configurationService.getExperimentBasedConfig(ConfigKey.Advanced.AnthropicExtendedCacheTtlMessages, experimentationService);
 }

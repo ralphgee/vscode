@@ -25,6 +25,7 @@ import { IEnvService, isScenarioAutomation } from '../../../platform/env/common/
 import { IVSCodeExtensionContext } from '../../../platform/extContext/common/extensionContext';
 import { IOctoKitService } from '../../../platform/github/common/githubService';
 import { ILogService } from '../../../platform/log/common/logService';
+import { modelSupportsExtendedCacheTtl } from '../../../platform/networking/common/anthropic';
 import { FinishedCallback, OpenAiFunctionTool, OptionalChatRequestParams } from '../../../platform/networking/common/fetch';
 import { IChatEndpoint, IEndpoint } from '../../../platform/networking/common/networking';
 import { APIUsage } from '../../../platform/networking/common/openai';
@@ -133,6 +134,23 @@ function buildConfigurationSchema(endpoint: IChatEndpoint, claudeDefaultEffort: 
 		const family = endpoint.family.toLowerCase();
 		const defaultOverride = family.startsWith('claude') ? claudeDefaultEffort : undefined;
 		properties.reasoningEffort = buildReasoningEffortSchemaProperty(effortLevels, family, defaultOverride);
+	}
+
+	// Extended (1h) prompt cache config. "On" adds the 1h TTL on top of the
+	// `chat.anthropic.promptCaching.extendedTtl*` settings; "Off" leaves them in charge.
+	if (modelSupportsExtendedCacheTtl(endpoint)) {
+		properties.extendedCacheTtl = {
+			type: 'boolean',
+			title: vscode.l10n.t('1h Cache'),
+			enum: [false, true],
+			enumItemLabels: [vscode.l10n.t('Off'), vscode.l10n.t('On')],
+			enumDescriptions: [
+				vscode.l10n.t('Prompt cache lifetime follows the settings (5 minutes by default)'),
+				vscode.l10n.t('Keep the prompt cache for 1 hour; cache writes cost more'),
+			],
+			default: false,
+			group: 'cache',
+		};
 	}
 
 	// Context size config

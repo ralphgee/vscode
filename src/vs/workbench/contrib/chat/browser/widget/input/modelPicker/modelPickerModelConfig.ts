@@ -18,6 +18,8 @@ type ModelConfigurationReader = Pick<IModelConfigurationAccess, 'getModelConfigu
 export const MODEL_CONFIG_GROUP_EFFORT = 'navigation';
 /** The context window group: how much context the model is given. */
 export const MODEL_CONFIG_GROUP_CONTEXT = 'tokens';
+/** The prompt cache group: whether the provider keeps the prompt cache longer. */
+export const MODEL_CONFIG_GROUP_CACHE = 'cache';
 
 export type IModelConfigPropertySchema = NonNullable<ILanguageModelConfigurationSchema['properties']>[string];
 

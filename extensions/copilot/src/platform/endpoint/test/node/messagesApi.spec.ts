@@ -934,6 +934,32 @@ suite('isExtendedCacheTtlEnabled', function () {
 		expect(isExtendedCacheTtlEnabled(ELIGIBLE_MODEL, configurationService, experimentationService, ChatLocation.Agent, false)).toBe(false);
 	});
 
+	test('the "1h Cache" picker option turns it on without the config, but keeps the other gates', function () {
+		// Config stays off: the picker option alone enables it on the main agent path,
+		// while the model, location, and subagent gates still apply.
+		const probe = (model: string, location: ChatLocation | undefined, sub: boolean, selected: boolean | undefined) =>
+			isExtendedCacheTtlEnabled(model, configurationService, experimentationService, location, sub, selected);
+
+		expect({
+			selected: probe(ELIGIBLE_MODEL, ChatLocation.Agent, false, true),
+			notSelected: probe(ELIGIBLE_MODEL, ChatLocation.Agent, false, false),
+			badModel: probe('gpt-5', ChatLocation.Agent, false, true),
+			badLocation: probe(ELIGIBLE_MODEL, ChatLocation.Panel, false, true),
+			subagent: probe(ELIGIBLE_MODEL, ChatLocation.Agent, true, true),
+		}).toEqual({
+			selected: true,
+			notSelected: false,
+			badModel: false,
+			badLocation: false,
+			subagent: false,
+		});
+	});
+
+	test('the "1h Cache" picker option set to off does not override an enabled config', function () {
+		enableConfig();
+		expect(isExtendedCacheTtlEnabled(ELIGIBLE_MODEL, configurationService, experimentationService, ChatLocation.Agent, false, false)).toBe(true);
+	});
+
 	test('composes all four gates: returns true only when model + config + Agent location + non-subagent all align', function () {
 		// Positive composition + negative on each axis. If a future refactor short-circuits
 		// before reading any single gate (e.g. drops the config check), one of these flips.
@@ -1030,6 +1056,17 @@ suite('isExtendedCacheTtlMessagesEnabled', function () {
 		// Only "both on" produces true — sub is a strict sub-toggle of parent.
 		// Model/location/subagent gates are inherited via the parent and covered in its suite.
 		expect(actual).toEqual(cases);
+	});
+
+	test('the "1h Cache" picker option turns it on without the sub config, but still requires the parent', function () {
+		configurationService.setConfig(ConfigKey.Advanced.AnthropicExtendedCacheTtlMessages, false);
+		expect({
+			parentOn: isExtendedCacheTtlMessagesEnabled(true, configurationService, experimentationService, true),
+			parentOff: isExtendedCacheTtlMessagesEnabled(false, configurationService, experimentationService, true),
+		}).toEqual({
+			parentOn: true,
+			parentOff: false,
+		});
 	});
 });
 

@@ -186,6 +186,8 @@ export interface IModelCapabilityOptions {
 	enableToolSearch?: boolean;
 	/** Enable context editing for this request. */
 	enableContextEditing?: boolean;
+	/** Request the extended (1 hour) prompt cache TTL in addition to what the settings enable. Only applies where the extended TTL is eligible. */
+	extendedCacheTtl?: boolean;
 }
 
 export interface IMakeChatRequestOptions {
